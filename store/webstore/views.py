@@ -8,6 +8,7 @@ def home(request):
     return render(request,'home.html',context)
 
 def cart(request,pk):
+    #Hola soy un comentario
     client = Client.objects.get(pk=pk)
 
     context = {'client':client}
