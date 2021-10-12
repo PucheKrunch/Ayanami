@@ -20,9 +20,12 @@ def guest(request):
 
 @login_required(login_url='login')
 def cart(request,pk):
-    client = User.objects.get(pk=pk)
-    context = {'client':client}
-    return render(request,'cart.html',context)
+    if request.path.split('/')[2] == str(request.user.id):
+        client = User.objects.get(pk=pk)
+        context = {'client':client}
+        return render(request,'cart.html',context)
+    else:
+        return redirect('home')
 
 def user_login(request):
     if request.user.is_authenticated:
@@ -66,3 +69,19 @@ def register(request):
 
         context = {'form':form}
         return render(request,'register.html',context)
+
+@login_required(login_url='login')
+def search(request):
+    if request.method == 'POST':
+        searched = request.POST['searched']
+        products = Product.objects.filter(name__contains=searched)
+        context = {
+            'products':products,
+            'item_searched':searched,
+            'flag':len(products),
+        }
+        return render(request,'search.html',context)
+    else:
+        products = Product.objects.all()
+        context = {'products':products}
+        return render(request,'search.html',context)

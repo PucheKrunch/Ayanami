@@ -8,4 +8,5 @@ urlpatterns = [
     path('register/',views.register, name='register'),
     path('cart/<str:pk>/',views.cart, name='cart'),
     path('guest/',views.guest, name='guest'),
+    path('search/',views.search, name='search'),
 ]

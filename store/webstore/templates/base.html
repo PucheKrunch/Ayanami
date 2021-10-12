@@ -31,20 +31,9 @@
                     <a class="nav-link active" aria-current="page" href="/">Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
+                    <a class="nav-link" href="{% url 'search' %}">Buscar</a>
                 </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Dropdown
-                    </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
-                </li>
                 <li>
                     <a class="nav-link active" aria-current="page" href="/cart/{{ request.user.id }}">
                         <img  id="cart-icon" src="{% static 'images/cart.png' %}">
@@ -52,21 +41,21 @@
                 </li>
             </ul>
 
-                <div class="form-inline my-2 my-lg-0">
-                    <style>
-                        .hello-user{
-                            font-size: 18px;
-                            color: #fff;
-                            margin-right: 20px;
-                        }
-                    </style>
-                    <span class="hello-user">Hola, {{request.user}}</span>
-                    <a href="{% url 'logout' %}"class="btn btn-warning">Logout</a> 
-                </div>
+            <div class="form-inline my-2 my-lg-0">
+                <style>
+                    .hello-user{
+                        font-size: 18px;
+                        color: #fff;
+                        margin-right: 20px;
+                    }
+                </style>
+                
+                <span class="hello-user">Hola, {{request.user}}</span>
+                <a href="{% url 'logout' %}"class="btn btn-warning">Logout</a> 
+            </div>
 
             </div>
         </div>
-
     </nav>
         {% block content %}
         {% endblock %}
