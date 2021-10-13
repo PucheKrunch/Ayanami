@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
-from .forms import CreateUserForm
+from .forms import *
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
@@ -85,3 +85,36 @@ def search(request):
         products = Product.objects.all()
         context = {'products':products}
         return render(request,'search.html',context)
+
+def apanel(request):
+    if request.user.is_staff:
+        context = {}
+        return render(request,'apanel.html',context)
+    else:
+        return redirect('home')
+
+def add_product(request):
+    if request.method == 'POST':
+        form = addProductForm(request.POST or None)
+        image = request.FILES.get('image')
+        print(image)
+        if form.is_valid():
+            p = Product.objects.create(
+                name = request.POST['name'],
+                price = request.POST['price'],
+                description = request.POST['description'],
+                image = image,
+            )
+        else:
+            name = request.POST['name']
+            price = request.POST['price']
+            description = request.POST['description']
+            messages.success(request,"Ocurrió un error; Por favor, intenta de nuevo...")
+            return render(request,'apanel.html',{
+                'name':name,
+                'price':price,
+                'description':description,
+                'image':image,
+            })
+    messages.success(request,f"Producto {request.POST['name']} agregado correctamente")
+    return redirect('home')

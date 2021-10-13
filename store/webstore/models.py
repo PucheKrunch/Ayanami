@@ -13,16 +13,9 @@ class Client(models.Model):
 
 
 class Product(models.Model):
-    size_choices = (
-        ('S','Chica'),
-        ('M','Mediana'),
-        ('L','Grande'),
-        ('XL','Extra Grande')
-    )
     name = models.CharField(max_length=200, null=True)
     price = models.FloatField()
     description = models.CharField(max_length=200, null=True)
-    size = models.CharField(max_length=2, choices=size_choices, null=True, blank=True)
     image = models.ImageField(null=True, blank=True)
 
     def __str__(self):
