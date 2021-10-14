@@ -123,3 +123,10 @@ def add_product(request):
             })
     messages.success(request,f"Producto {request.POST['name']} agregado correctamente")
     return redirect('home')
+
+def product_page(request,pk):
+    product = Product.objects.get(pk=int(request.path.split('/')[2]))
+    context = {
+        'product':product,
+    }
+    return render(request,'product.html',context)
