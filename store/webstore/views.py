@@ -58,13 +58,18 @@ def register(request):
         return redirect('home')
     else:
         form = CreateUserForm()
+        client_form = addClientForm()
 
         if request.method == 'POST':
             form = CreateUserForm(request.POST)
-            if form.is_valid():
-                form.save()
-                user = form.cleaned_data.get('username')
-                messages.success(request,"Cuenta creada para exitosamente para " + user)
+            client_form = addClientForm(request.POST)
+            if form.is_valid() and client_form.is_valid():
+                user = form.save()
+                client = client_form.save(commit=False)
+                client.user = user
+                client.save()
+                username = form.cleaned_data.get('username')
+                messages.success(request,"Cuenta creada para exitosamente para " + username)
                 return redirect('login')
 
         context = {'form':form}
