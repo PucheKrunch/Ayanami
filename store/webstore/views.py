@@ -5,6 +5,9 @@ from .forms import *
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+import json
+import datetime
 
 # Create your views here.
 @login_required(login_url='guest')
@@ -19,13 +22,72 @@ def guest(request):
     return render(request,'guest.html',context)
 
 @login_required(login_url='login')
-def cart(request,pk):
-    if request.path.split('/')[2] == str(request.user.id):
-        client = User.objects.get(pk=pk)
-        context = {'client':client}
+def cart(request):
+    if request.user.is_authenticated:
+        client = request.user.client
+        order, created = Order.objects.get_or_create(client=client.user,complete=False)
+        items = order.orderitem_set.all()
+        context = {
+            'items':items,
+            'order':order,
+        }
         return render(request,'cart.html',context)
     else:
         return redirect('home')
+
+@login_required(login_url='login')
+def checkout(request):
+    if request.user.is_authenticated:
+        client = request.user.client
+        order, created = Order.objects.get_or_create(client=client.user,complete=False)
+        items = order.orderitem_set.all()
+        context = {
+            'items':items,
+            'order':order,
+        }
+        return render(request,'checkout.html',context)
+    else:
+        return redirect('home')
+
+@login_required(login_url='login')
+def updateItem(request):
+    data = json.loads(request.body)
+    productId = data['productId']
+    action = data['action']
+    client = request.user.client
+    product = Product.objects.get(id=productId)
+    order, created = Order.objects.get_or_create(client=client.user,complete=False)
+    orderItem, created = OrderItem.objects.get_or_create(order=order,product=product)
+    if action == 'add':
+        orderItem.quantity = (orderItem.quantity + 1)
+    elif action == 'remove':
+        orderItem.quantity = (orderItem.quantity - 1)
+    orderItem.save()
+    if orderItem.quantity <= 0:
+        orderItem.delete()
+    return JsonResponse('Item added',safe=False)
+
+@login_required(login_url='login')
+def processOrder(request):
+    transaction_id = datetime.datetime.now().timestamp()
+    data = json.loads(request.body)
+    client = request.user.client
+    order, created = Order.objects.get_or_create(client=client.user,complete=False)
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+    if total == order.get_cart_total:
+        order.complete = True
+    order.save()
+
+    ShippingAddress.objects.create(
+        client=client.user,
+        order=order,
+        address=data['shipping']['address'],
+        city=data['shipping']['city'],
+        state=data['shipping']['state'],
+        zipcode=data['shipping']['zipcode'],
+    )
+    return JsonResponse('Payment complete',safe=False)
 
 def user_login(request):
     if request.user.is_authenticated:
@@ -91,6 +153,7 @@ def search(request):
         context = {'products':products}
         return render(request,'search.html',context)
 
+@login_required(login_url='login')
 def apanel(request):
     if request.user.is_staff:
         context = {}
@@ -98,6 +161,7 @@ def apanel(request):
     else:
         return redirect('home')
 
+@login_required(login_url='login')
 def add_product(request):
     if request.method == 'POST':
         form = addProductForm(request.POST or None)
@@ -124,6 +188,7 @@ def add_product(request):
     messages.success(request,f"Producto {request.POST['name']} agregado correctamente")
     return redirect('home')
 
+@login_required(login_url='login')
 def product_page(request,pk):
     product = Product.objects.get(pk=int(request.path.split('/')[2]))
     context = {
